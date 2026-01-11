@@ -313,26 +313,14 @@
 
             const name = document.getElementById('previewName').textContent || 'design';
 
-            // Try to get the actual background-image URL from computed style
-            let bg = window.getComputedStyle(previewImage).backgroundImage || '';
-            let imageUrl = '';
-            if (bg && bg !== 'none') {
-                // backgroundImage looks like: url("...")
-                imageUrl = bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
-            }
-
-            // Fallback to known filenames if computed style didn't return a URL
-            if (!imageUrl) {
-                const isDesign1 = previewImage.classList.contains('design1');
-                imageUrl = isDesign1 ? 'design1.jpg' : 'design2.jpg';
-            }
+            // Determine which design is selected
+            const isDesign1 = previewImage.classList.contains('design1');
+            const imageUrl = isDesign1 
+                ? 'https://raw.githubusercontent.com/webdesigner-SA/Eid/main/design1.jpg'
+                : 'https://raw.githubusercontent.com/webdesigner-SA/Eid/main/design2.jpg';
 
             const img = new Image();
-
-            // Only set crossOrigin when loading remote resources
-            if (/^https?:\/\//i.test(imageUrl) || /^\/\//.test(imageUrl)) {
-                img.crossOrigin = 'anonymous';
-            }
+            img.crossOrigin = 'anonymous'; // Allow cross-origin for raw.githubusercontent.com
 
             img.onload = function() {
                 // Draw the background image (cover behavior)
@@ -382,7 +370,6 @@
 
             img.onerror = function() {
                 // fallback: draw a simple gradient so download still works
-                const isDesign1 = previewImage.classList.contains('design1');
                 const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
                 if (isDesign1) {
                     gradient.addColorStop(0, '#4b6584');
@@ -418,7 +405,7 @@
                 });
             };
 
-            // Start loading the image (this can be a local path or a remote URL)
+            // Load the image from the absolute GitHub URL
             img.src = imageUrl;
         }
     </script>
