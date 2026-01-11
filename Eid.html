@@ -101,11 +101,15 @@
         }
 
         .design1 {
-            background: linear-gradient(135deg, #4b6584 0%, #2c3e50 100%);
+            background-image: url('https://raw.githubusercontent.com/webdesigner-SA/Eid/main/design1.jpg');
+            background-size: cover;
+            background-position: center;
         }
 
         .design2 {
-            background: linear-gradient(135deg, #7d9d9c 0%, #576f72 100%);
+            background-image: url('https://raw.githubusercontent.com/webdesigner-SA/Eid/main/design2.jpg');
+            background-size: cover;
+            background-position: center;
         }
 
         .button-group {
@@ -172,11 +176,15 @@
         }
 
         .preview-image.design1 {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-image: url('https://raw.githubusercontent.com/webdesigner-SA/Eid/main/design1.jpg');
+            background-size: cover;
+            background-position: center;
         }
 
         .preview-image.design2 {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background-image: url('https://raw.githubusercontent.com/webdesigner-SA/Eid/main/design2.jpg');
+            background-size: cover;
+            background-position: center;
         }
 
         .preview-name {
@@ -303,38 +311,115 @@
             canvas.width = 400;
             canvas.height = 300;
 
-            // Get design class
-            const isDesign1 = previewImage.classList.contains('design1');
-            
-            // Draw gradient background
-            const gradient = ctx.createLinearGradient(0, 0, 400, 300);
-            if (isDesign1) {
-                gradient.addColorStop(0, '#667eea');
-                gradient.addColorStop(1, '#764ba2');
-            } else {
-                gradient.addColorStop(0, '#f093fb');
-                gradient.addColorStop(1, '#f5576c');
+            const name = document.getElementById('previewName').textContent || 'design';
+
+            // Try to get the actual background-image URL from computed style
+            let bg = window.getComputedStyle(previewImage).backgroundImage || '';
+            let imageUrl = '';
+            if (bg && bg !== 'none') {
+                // backgroundImage looks like: url("...")
+                imageUrl = bg.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
             }
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, 400, 300);
 
-            // Draw text
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 48px Arial';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const name = document.getElementById('previewName').textContent;
-            ctx.fillText(name, 200, 150);
+            // Fallback to known filenames if computed style didn't return a URL
+            if (!imageUrl) {
+                const isDesign1 = previewImage.classList.contains('design1');
+                imageUrl = isDesign1 ? 'design1.jpg' : 'design2.jpg';
+            }
 
-            // Download
-            canvas.toBlob(function(blob) {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${name}_design.png`;
-                a.click();
-                URL.revokeObjectURL(url);
-            });
+            const img = new Image();
+
+            // Only set crossOrigin when loading remote resources
+            if (/^https?:\/\//i.test(imageUrl) || /^\/\//.test(imageUrl)) {
+                img.crossOrigin = 'anonymous';
+            }
+
+            img.onload = function() {
+                // Draw the background image (cover behavior)
+                // Calculate aspect-cover draw
+                const sw = img.width, sh = img.height, dw = canvas.width, dh = canvas.height;
+                const srcRatio = sw / sh, destRatio = dw / dh;
+                let sx = 0, sy = 0, sWidth = sw, sHeight = sh;
+                if (srcRatio > destRatio) {
+                    // source is wider -> crop sides
+                    sWidth = sh * destRatio;
+                    sx = (sw - sWidth) / 2;
+                } else {
+                    // source is taller -> crop top/bottom
+                    sHeight = sw / destRatio;
+                    sy = (sh - sHeight) / 2;
+                }
+                ctx.drawImage(img, sx, sy, sWidth, sHeight, 0, 0, dw, dh);
+
+                // Draw semi-transparent overlay for text readability
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                ctx.fillRect(0, 0, dw, dh);
+
+                // Draw text
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+                ctx.shadowBlur = 6;
+                ctx.fillText(name, dw / 2, dh / 2);
+
+                // Download
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${name}_design.png`;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(function() {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 150);
+                });
+            };
+
+            img.onerror = function() {
+                // fallback: draw a simple gradient so download still works
+                const isDesign1 = previewImage.classList.contains('design1');
+                const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+                if (isDesign1) {
+                    gradient.addColorStop(0, '#4b6584');
+                    gradient.addColorStop(1, '#2c3e50');
+                } else {
+                    gradient.addColorStop(0, '#7d9d9c');
+                    gradient.addColorStop(1, '#576f72');
+                }
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = 'rgba(0,0,0,0.25)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 48px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(name, canvas.width / 2, canvas.height / 2);
+
+                canvas.toBlob(function(blob) {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `${name}_design.png`;
+                    a.style.display = 'none';
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(function() {
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    }, 150);
+                });
+            };
+
+            // Start loading the image (this can be a local path or a remote URL)
+            img.src = imageUrl;
         }
     </script>
 </body>
