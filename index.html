@@ -180,12 +180,12 @@ function downloadImage() {
         font.load().then(function(loadedFont) {
             document.fonts.add(loadedFont);
             // Now safe to use the font in canvas (bold)
-            let fontSize = 40;
+            let fontSize = 35;
             ctx.font = "bold " + fontSize + "px DINNextArabic";
-            ctx.fillStyle = "#cfc9bd";
+            ctx.fillStyle = "white";
             ctx.textAlign = "center";
-            let textBlockCenter = Math.round(img.width * (180 / 500));
-            const y = Math.round(img.height * (277 / 500));
+            let textBlockCenter = Math.round(img.width / 2); // Center horizontally
+            const y = Math.round(img.height * (390 / 500)); // Keep same y
             ctx.fillText(name, textBlockCenter, y);
             origCanvas.toBlob(function(blob) {
                 const url = URL.createObjectURL(blob);
@@ -205,8 +205,8 @@ function downloadImage() {
             ctx.font = "bold " + fontSize + "px sans-serif";
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
-            let textBlockCenter = Math.round(img.width * (180 / 500));
-            const y = Math.round(img.height * (250 / 500));
+            let textBlockCenter = Math.round(img.width / 2); // Center horizontally
+            const y = Math.round(img.height * (390 / 500)); // Keep same y
             ctx.fillText(name, textBlockCenter, y);
             origCanvas.toBlob(function(blob) {
                 const url = URL.createObjectURL(blob);
