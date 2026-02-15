@@ -5,6 +5,12 @@
 <title>بطاقة تهنئة رمضان</title>
 
 <style>
+        @font-face {
+            font-family: 'DINNextArabic';
+            src: url('DIN NEXT™️ ARABIC REGULAR.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+        }
     body {
         margin: 0;
         padding: 0;
@@ -161,7 +167,6 @@ function backToForm() {
 
 function downloadImage() {
     const name = document.getElementById("username").value.trim() || "تهنئتك";
-    // Create a hidden canvas at the original image size
     const img = new Image();
     img.src = "Ramadan.jpg";
     img.onload = function() {
@@ -170,29 +175,51 @@ function downloadImage() {
         origCanvas.height = img.height;
         const ctx = origCanvas.getContext('2d');
         ctx.drawImage(img, 0, 0);
-        // Dynamically fit the name in the empty space for download
-        fontSize = Math.round(img.width / 18);
-        ctx.font = fontSize + "px Tajawal";
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        // Center in the empty space under the text block
-        let textBlockWidth = Math.round(img.width * (370 / 500));
-        let textBlockCenter = Math.round(img.width * (180 / 500));
-        const y = Math.round(img.height * (250 / 500));
-        fontSize = 40;
-        ctx.font = fontSize + "px Tajawal";
-        ctx.fillText(name, textBlockCenter, y);
-        origCanvas.toBlob(function(blob) {
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = name + ".png";
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function() {
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 150);
+        // Load DINNextArabic font before drawing text
+        const font = new FontFace('DINNextArabic', 'url("DIN NEXT™️ ARABIC REGULAR.otf")');
+        font.load().then(function(loadedFont) {
+            document.fonts.add(loadedFont);
+            // Now safe to use the font in canvas
+            let fontSize = 40;
+            ctx.font = fontSize + "px DINNextArabic";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            let textBlockCenter = Math.round(img.width * (180 / 500));
+            const y = Math.round(img.height * (250 / 500));
+            ctx.fillText(name, textBlockCenter, y);
+            origCanvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = name + ".png";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 150);
+            });
+        }).catch(function() {
+            alert('تعذر تحميل الخط. سيتم استخدام الخط الافتراضي.');
+            let fontSize = 40;
+            ctx.font = fontSize + "px sans-serif";
+            ctx.fillStyle = "white";
+            ctx.textAlign = "center";
+            let textBlockCenter = Math.round(img.width * (180 / 500));
+            const y = Math.round(img.height * (250 / 500));
+            ctx.fillText(name, textBlockCenter, y);
+            origCanvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = name + ".png";
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(function() {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 150);
+            });
         });
     };
     img.onerror = function() {
