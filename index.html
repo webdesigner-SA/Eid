@@ -179,13 +179,13 @@ function downloadImage() {
         const font = new FontFace('DINNextArabic', 'url("DIN NEXT™️ ARABIC REGULAR.otf")');
         font.load().then(function(loadedFont) {
             document.fonts.add(loadedFont);
-            // Now safe to use the font in canvas
+            // Now safe to use the font in canvas (bold)
             let fontSize = 40;
-            ctx.font = fontSize + "px DINNextArabic";
-            ctx.fillStyle = "white";
+            ctx.font = "bold " + fontSize + "px DINNextArabic";
+            ctx.fillStyle = "#cfc9bd";
             ctx.textAlign = "center";
             let textBlockCenter = Math.round(img.width * (180 / 500));
-            const y = Math.round(img.height * (250 / 500));
+            const y = Math.round(img.height * (277 / 500));
             ctx.fillText(name, textBlockCenter, y);
             origCanvas.toBlob(function(blob) {
                 const url = URL.createObjectURL(blob);
@@ -202,7 +202,7 @@ function downloadImage() {
         }).catch(function() {
             alert('تعذر تحميل الخط. سيتم استخدام الخط الافتراضي.');
             let fontSize = 40;
-            ctx.font = fontSize + "px sans-serif";
+            ctx.font = "bold " + fontSize + "px sans-serif";
             ctx.fillStyle = "white";
             ctx.textAlign = "center";
             let textBlockCenter = Math.round(img.width * (180 / 500));
